@@ -1,37 +1,41 @@
 import React from 'react';
+import styled from 'styled-components';
 
-import viteLogo from '/vite.svg';
-import reactLogo from '@/shared/assets/react.svg';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from 'react-router-dom';
 
-import './App.css';
+import { AuthPage, DashboardPage } from '@/pages';
 
-function App() {
-  const [count, setCount] = React.useState(0);
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: (
+      <Navigate to='/auth' replace />
+    ) /* Базовый редирект на стр. авторизации */,
+  },
+  {
+    path: '/auth',
+    element: <AuthPage />,
+  },
+  {
+    path: '/dashboard',
+    element: <DashboardPage />,
+  },
+]);
 
+const AppWrapper = styled.div`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+export const App: React.FC = () => {
   return (
-    <>
-      <div>
-        <a href='https://vite.dev' target='_blank'>
-          <img src={viteLogo} className='logo' alt='Vite logo' />
-        </a>
-        <a href='https://react.dev' target='_blank'>
-          <img src={reactLogo} className='logo react' alt='React logo' />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className='card'>
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className='read-the-docs'>
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <AppWrapper>
+      <RouterProvider router={router} />
+    </AppWrapper>
   );
-}
-
-export default App;
+};
