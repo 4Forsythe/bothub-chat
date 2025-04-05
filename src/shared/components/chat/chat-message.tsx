@@ -3,6 +3,10 @@ import styled from 'styled-components';
 
 import { Avatar, Badge } from '@/shared/ui';
 import { ChatCopyButton } from '@/shared/components';
+import { modelIcons } from '@/shared/constants';
+
+import type { ModelType } from '@/entities/model';
+import type { MessageType } from '@/entities/message';
 
 const UserChatMessageWrapper = styled.div`
   gap: 10px;
@@ -14,6 +18,7 @@ const UserChatMessageWrapper = styled.div`
 `;
 
 const UserChatMessageContent = styled.div`
+  min-height: 51px;
   padding: 7px 45px 7px 8px;
   border-radius: 10px 10px 0 10px;
   background-color: rgba(var(--primary-color), 0.5);
@@ -61,6 +66,7 @@ const ModelChatMessageContent = styled.div`
 `;
 
 const ModelChatMessageText = styled.p`
+  min-height: 51px;
   padding: 8.5px 4px;
   display: flex;
   align-items: flex-start;
@@ -86,21 +92,32 @@ const ModelChatMessageScore = styled.span`
 
 const ModelChatMessageTimestamp = styled.span`
   font-size: 11px;
-  margin-left: auto;
 `;
 
 interface Props {
-  role: string;
+  data: MessageType;
+  model: ModelType;
 }
 
-export const ChatMessage: React.FC<Props> = ({ role }) => {
+export const ChatMessage: React.FC<Props> = ({ data, model }) => {
+  const { role, status, content, tokens, model_id, created_at } = data;
+
+  const iconFile = modelIcons.includes(`${model.id}.svg`)
+    ? `/icons/ai-models/${model.id}.svg`
+    : undefined;
+
+  const timestamp = new Date(created_at).toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
   if (role === 'user') {
     return (
       <UserChatMessageWrapper>
-        <ChatCopyButton value='типо тестим' />
+        <ChatCopyButton value={content} />
         <UserChatMessageContent>
-          <UserChatMessageText>Привет, бот!</UserChatMessageText>
-          <UserChatMessageTimestamp>09:54</UserChatMessageTimestamp>
+          <UserChatMessageText>{content}</UserChatMessageText>
+          <UserChatMessageTimestamp>{timestamp}</UserChatMessageTimestamp>
         </UserChatMessageContent>
         <Avatar />
       </UserChatMessageWrapper>
@@ -110,20 +127,27 @@ export const ChatMessage: React.FC<Props> = ({ role }) => {
   return (
     <ModelChatMessageWrapper>
       <ModelChatMessageHeader>
-        <span>ChatGPT</span>
-        <Badge text='gpt-3.5-turbo' />
+        <span>{model.label}</span>
+        {model_id && <Badge text={model_id} />}
       </ModelChatMessageHeader>
       <ModelChatMessageContainer>
-        <Avatar url='/icons/ai-models/gpt.svg' />
+        <Avatar
+          url={iconFile}
+          backgroundColor={model.message_color ?? undefined}
+        />
         <ModelChatMessageContent>
-          <ModelChatMessageText>Привет. Чем могу помочь?</ModelChatMessageText>
-          <ModelChatMessageFooter>
-            <ModelChatMessageMeta>
-              <ModelChatMessageScore>-223 Caps</ModelChatMessageScore>
-              <ChatCopyButton value='типо тестим' />
-            </ModelChatMessageMeta>
-            <ModelChatMessageTimestamp>09:54</ModelChatMessageTimestamp>
-          </ModelChatMessageFooter>
+          <ModelChatMessageText>
+            {status === 'PENDING' && !content ? '...' : content}
+          </ModelChatMessageText>
+          {status === 'DONE' && (
+            <ModelChatMessageFooter>
+              <ModelChatMessageMeta>
+                <ModelChatMessageScore>-{tokens} Caps</ModelChatMessageScore>
+                <ChatCopyButton value={content} />
+              </ModelChatMessageMeta>
+              <ModelChatMessageTimestamp>{timestamp}</ModelChatMessageTimestamp>
+            </ModelChatMessageFooter>
+          )}
         </ModelChatMessageContent>
       </ModelChatMessageContainer>
     </ModelChatMessageWrapper>

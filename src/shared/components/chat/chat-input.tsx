@@ -1,10 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Send } from 'lucide-react';
+import { Loader2, Send } from 'lucide-react';
 
 import { IconButton } from '@/shared/ui';
 
-const ChatInputWrapper = styled.div<{ $isFocus?: boolean }>`
+const ChatInputWrapper = styled.div<{
+  $isFocus?: boolean;
+  $isLoading?: boolean;
+}>`
   gap: 14px;
   width: 100%;
   height: 66px;
@@ -28,12 +31,21 @@ const ChatInputWrapper = styled.div<{ $isFocus?: boolean }>`
     background-color: rgba(var(--secondary-color), 0.5);
     box-shadow: 0 0 0 4px rgba(var(--primary-color), 0.5);
   `}
+
+  ${({ $isLoading }) =>
+    $isLoading &&
+    `
+    opacity: 0.75;
+    pointer-events: none;
+    background-color: rgba(var(--secondary-color), 0.5);
+  `}
 `;
 
 const ChatInputField = styled.input`
   flex: 1;
   border: none;
   padding: 24px 0 24px 20px;
+  font-size: 15px;
   font-weight: 500;
   font-family: var(--font-sans);
   background-color: transparent;
@@ -52,17 +64,33 @@ const ChatInputField = styled.input`
   }
 `;
 
-export const ChatInput: React.FC = () => {
+const LoaderIcon = styled(Loader2)`
+  width: 24px;
+  height: 24px;
+  color: rgba(var(--muted-color), 0.75);
+  animation-name: spin;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+`;
+
+interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
+  isLoading?: boolean;
+}
+
+export const ChatInput: React.FC<Props> = ({ isLoading, ...rest }) => {
   const [isFocus, setIsFocus] = React.useState(false);
 
   return (
-    <ChatInputWrapper $isFocus={isFocus}>
+    <ChatInputWrapper $isFocus={isFocus} $isLoading={isLoading}>
       <ChatInputField
         placeholder='Спроси о чем-нибудь...'
         onFocus={() => setIsFocus(true)}
         onBlur={() => setIsFocus(false)}
+        disabled={isLoading || rest.disabled}
+        {...rest}
       />
-      <IconButton icon={Send} />
+      {isLoading ? <LoaderIcon /> : <IconButton icon={Send} type='submit' />}
     </ChatInputWrapper>
   );
 };

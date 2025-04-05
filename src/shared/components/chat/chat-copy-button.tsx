@@ -26,7 +26,10 @@ export const ChatCopyButton: React.FC<Props> = ({ value }) => {
   const { state, copy } = useClipboard({ delay: 5000 });
 
   return (
-    <ChatCopyButtonWrapper onClick={() => copy(value)}>
+    <ChatCopyButtonWrapper
+      aria-label='Скопировать текст'
+      onClick={() => copy(value)}
+    >
       {state === 'ready' && <Copy size={16} />}
       {state === 'success' && <Check size={16} />}
     </ChatCopyButtonWrapper>
