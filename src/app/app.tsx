@@ -1,30 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { Toaster } from 'sonner';
 
-import {
-  createBrowserRouter,
-  RouterProvider,
-  Navigate,
-} from 'react-router-dom';
-
-import { AuthPage, DashboardPage } from '@/pages';
-
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: (
-      <Navigate to='/auth' replace />
-    ) /* Базовый редирект на стр. авторизации */,
-  },
-  {
-    path: '/auth',
-    element: <AuthPage />,
-  },
-  {
-    path: '/dashboard',
-    element: <DashboardPage />,
-  },
-]);
+import { Middleware } from './middleware';
+import { DashboardLayout } from '@/layouts';
+import { AuthPage, ChatPage, HomePage } from '@/pages';
+import { NotFound } from '@/shared/components';
 
 const AppWrapper = styled.div`
   height: 100%;
@@ -32,10 +14,42 @@ const AppWrapper = styled.div`
   flex-direction: column;
 `;
 
+const router = createBrowserRouter([
+  {
+    path: '*',
+    element: <NotFound />, // Страница 404
+  },
+  {
+    path: '/auth',
+    element: <AuthPage />, // Страница авторизации
+  },
+  {
+    path: '/',
+    element: (
+      <Middleware>
+        <DashboardLayout />
+      </Middleware>
+    ),
+    children: [
+      {
+        path: '/',
+        element: <HomePage />, // Главная страница (новый чат)
+      },
+      {
+        path: 'chat/:id',
+        element: <ChatPage />, // Вложенная страница чата с динамическим параметром id
+      },
+    ],
+  },
+]);
+
 export const App: React.FC = () => {
   return (
-    <AppWrapper>
-      <RouterProvider router={router} />
-    </AppWrapper>
+    <React.Fragment>
+      <Toaster position='top-center' expand={false} richColors />
+      <AppWrapper>
+        <RouterProvider router={router} />
+      </AppWrapper>
+    </React.Fragment>
   );
 };
