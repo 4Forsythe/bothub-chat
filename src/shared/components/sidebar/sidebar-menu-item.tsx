@@ -1,9 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Trash } from 'lucide-react';
+import { Loader2, MessageSquare, Trash } from 'lucide-react';
 
-const MenuItemWrapper = styled.li<{ $isActive?: boolean }>`
+import type { ChatType } from '@/entities/chat';
+import { isPending } from '@reduxjs/toolkit';
+
+const MenuItemWrapper = styled.li<{
+  $isActive?: boolean;
+  $isPending?: boolean;
+}>`
   gap: 8px;
   width: 100%;
   max-width: 320px;
@@ -11,15 +17,35 @@ const MenuItemWrapper = styled.li<{ $isActive?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  opacity: ${({ $isActive }) => ($isActive ? '1' : '0.75')};
+  opacity: ${({ $isActive, $isPending }) => {
+    if ($isPending && !$isActive) return '0.5';
+    if ($isActive) return '1';
+    return '0.75';
+  }};
   font-weight: 500;
+  border-radius: 12px;
   color: rgb(var(--muted-foreground-color));
+  background-color: ${({ $isPending }) =>
+    $isPending ? 'rgba(var(--secondary-color), .5)' : 'transparent'};
   transition: opacity 250ms ease;
 
   &:hover {
     opacity: 1;
   }
 `;
+
+const StyledLoader = styled(Loader2)`
+  color: rgba(var(--muted-color), 0.75);
+  animation-name: spin;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+`;
+
+/*
+  Source: https://reactrouter.com/7.4.1/start/framework/navigating#navlink
+  Тут можно и НУЖНО, скорее всего, использовать NavLink со статусами из RRD, но мне надо стилизовать враппер, а не саму линку, поэтому так
+*/
 
 const StyledLink = styled(Link)`
   gap: 8px;
@@ -31,16 +57,24 @@ const StyledLink = styled(Link)`
 
 type ISidebarMenuItem = {
   path: string;
-  name: string;
+  chat: ChatType;
 };
 
 interface Props extends ISidebarMenuItem {
   isActive?: boolean;
+  isPending?: boolean;
+  onDelete: () => void;
 }
 
-export const SidebarMenuItem: React.FC<Props> = ({ path, name, isActive }) => {
+export const SidebarMenuItem: React.FC<Props> = ({
+  path,
+  chat,
+  isActive,
+  isPending,
+  onDelete,
+}) => {
   return (
-    <MenuItemWrapper $isActive={isActive}>
+    <MenuItemWrapper $isActive={isActive} $isPending={isPending}>
       <StyledLink to={path}>
         <MessageSquare size={15} />
         <span
@@ -50,12 +84,16 @@ export const SidebarMenuItem: React.FC<Props> = ({ path, name, isActive }) => {
               : 'rgb(var(--muted-foreground-color))',
           }}
         >
-          {name}
+          {chat.name}
         </span>
       </StyledLink>
-      <button>
-        <Trash size={15} />
-      </button>
+      {isPending ? (
+        <StyledLoader size={15} />
+      ) : (
+        <button onClick={onDelete}>
+          <Trash size={15} />
+        </button>
+      )}
     </MenuItemWrapper>
   );
 };
