@@ -1,9 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { ChevronDown } from 'lucide-react';
-import { CSSTransition } from 'react-transition-group';
+import { ChevronDown, Loader } from 'lucide-react';
 
-import { RippleEffect } from '@/shared/ui';
+import { RippleEffect, SelectorDropdown } from '@/shared/ui';
 
 const SelectorWrapper = styled.div`
   width: fit-content;
@@ -25,12 +24,19 @@ const SelectorContainer = styled.button`
   background-color: rgba(var(--sidebar-color), 0.75);
   position: relative;
   overflow: hidden;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+    background-color: rgba(var(--muted-color), 0.1);
+  }
 `;
 
 const SelectorIcon = styled(ChevronDown)<{
   $isOpen: boolean;
   $direction: 'up' | 'down';
 }>`
+  flex-shrink: 0;
   transition: transform 0.3s ease-in-out;
   transform: ${({ $isOpen, $direction }) =>
     $isOpen
@@ -42,51 +48,14 @@ const SelectorIcon = styled(ChevronDown)<{
       : 'rotate(-180deg)'};
 `;
 
-const SelectorDropdown = styled.div<{
-  $direction: 'up' | 'down';
-}>`
-  left: 0;
-  ${({ $direction }) =>
-    $direction === 'down' ? 'top: 100%;' : 'bottom: 100%;'}
-  ${({ $direction }) =>
-    $direction === 'down' ? 'margin-top: 8px;' : 'margin-bottom: 8px;'};
-  display: flex;
-  flex-direction: column;
-  border-radius: 10px;
-  border: 1px solid rgb(var(--border-color));
-  background-color: rgba(var(--sidebar-color), 0.8);
-  position: absolute;
-`;
-
-const SelectorDropdownList = styled.ul`
-  flex: 1;
-  gap: 6px;
-  width: 100%;
-  padding: 6px;
-  display: flex;
-  flex-direction: column;
-`;
-
-const SelectorDropdownListItem = styled.li<{ $isActive?: boolean }>`
-  gap: 10px;
-  width: 100%;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: 8px;
-  background-color: ${({ $isActive }) =>
-    $isActive ? 'rgb(var(--secondary-color))' : 'transparent'};
-  transition: background 250ms ease;
-  position: relative;
-  overflow: hidden;
-
-  &:hover {
-    ${({ $isActive }) =>
-      !$isActive && 'background-color: rgba(var(--border-color), 0.15)'};
-  }
+const StyledLoader = styled.div`
+  width: 20px;
+  height: 20px;
+  color: var(--foreground-color);
+  animation-name: spin;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
 `;
 
 interface Props {
@@ -96,9 +65,14 @@ interface Props {
   direction?: 'up' | 'down';
   values: React.ReactNode[] | string[];
   targetIndex?: number;
+  disabled?: boolean;
+  disabledItems?: number[];
+  isLoading?: boolean;
   style?: React.CSSProperties;
   onChange: (index: number) => void;
 }
+
+/* Note: Компонент довольно большой получился, возможно стоило использовать библиотеку... */
 
 export const Selector: React.FC<Props> = ({
   children,
@@ -107,13 +81,15 @@ export const Selector: React.FC<Props> = ({
   direction = 'down',
   values,
   targetIndex,
+  disabled,
+  disabledItems,
+  isLoading,
   style,
   onChange,
 }) => {
   const [isPopup, setIsPopup] = React.useState(false);
 
   const elementRef = React.useRef<HTMLDivElement>(null);
-  const dropdownRef = React.useRef(null);
 
   const handleOnChange = (index: number) => {
     onChange(index);
@@ -143,39 +119,30 @@ export const Selector: React.FC<Props> = ({
           ...style,
           borderColor: border ? 'rgb(var(--border-color))' : 'transparent',
         }}
+        type='button'
+        disabled={isLoading || disabled}
         onClick={() => setIsPopup((prev) => !prev)}
       >
-        {children}
+        {isLoading ? (
+          <StyledLoader>
+            <Loader size={20} />
+          </StyledLoader>
+        ) : (
+          children
+        )}
         <SelectorIcon $isOpen={isPopup} $direction={direction} size={20} />
         {border && <RippleEffect />}
       </SelectorContainer>
 
-      <CSSTransition
-        nodeRef={dropdownRef}
-        in={isPopup}
-        timeout={300}
-        classNames={direction === 'up' ? 'popup-dropup' : 'popup-dropdown'}
-        unmountOnExit
-      >
-        <SelectorDropdown
-          ref={dropdownRef}
-          $direction={direction}
-          style={{ width: `${popupWidth}px` }}
-        >
-          <SelectorDropdownList>
-            {values.map((value, index) => (
-              <SelectorDropdownListItem
-                key={index}
-                $isActive={targetIndex === index}
-                onClick={() => handleOnChange(index)}
-              >
-                {value}
-                <RippleEffect />
-              </SelectorDropdownListItem>
-            ))}
-          </SelectorDropdownList>
-        </SelectorDropdown>
-      </CSSTransition>
+      <SelectorDropdown
+        isVisible={isPopup}
+        popupWidth={popupWidth}
+        direction={direction}
+        values={values}
+        targetIndex={targetIndex}
+        disabledItems={disabledItems}
+        onChange={(index) => handleOnChange(index)}
+      />
     </SelectorWrapper>
   );
 };

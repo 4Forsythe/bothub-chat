@@ -1,10 +1,18 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-const AvatarWrraper = styled.div<{ $size: 'sm' | 'md'; $gradient: boolean }>`
-  display: flex
-  align-items: center
+const AvatarWrraper = styled.div<{
+  $size: 'sm' | 'md';
+  $gradient: boolean;
+  $backgroundColor?: string;
+}>`
+  display: flex;
+  align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  color: rgb(var(--foreground-color));
+  background-color: ${({ $backgroundColor }) =>
+    $backgroundColor ? $backgroundColor : 'transparent'};
   border-radius: 55px;
   overflow: hidden;
   position: relative;
@@ -36,16 +44,40 @@ const StyledImage = styled.img`
   object-fit: cover;
 `;
 
+const StyledLabel = styled.span`
+  width: 100%;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  text-transform: uppercase;
+`;
+
 interface Props {
   url?: string;
   size?: 'sm' | 'md';
+  children?: string;
+  backgroundColor?: string;
   isPremium?: boolean;
 }
 
-export const Avatar: React.FC<Props> = ({ url, size = 'md', isPremium }) => {
+export const Avatar: React.FC<Props> = ({
+  url,
+  size = 'md',
+  children,
+  backgroundColor,
+  isPremium,
+}) => {
   return (
-    <AvatarWrraper $size={size} $gradient={!!isPremium}>
-      <StyledImage src={url ? url : '/icons/avatar.svg'} alt='Аватарка' />
+    <AvatarWrraper
+      $size={size}
+      $gradient={!!isPremium}
+      $backgroundColor={backgroundColor}
+    >
+      {children ? (
+        <StyledLabel>{children}</StyledLabel>
+      ) : (
+        <StyledImage src={url ? url : '/icons/avatar.svg'} alt='Аватарка' />
+      )}
     </AvatarWrraper>
   );
 };

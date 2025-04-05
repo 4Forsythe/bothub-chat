@@ -5,5 +5,7 @@ export { Container } from './container';
 export { IconButton } from './icon-button';
 export { FormField } from './form-field';
 export { Heading } from './heading';
+export { Paragraph } from './paragraph';
 export { Selector } from './selector';
+export { SelectorDropdown } from './selector-dropdown';
 export { RippleEffect } from './ripple-effect';

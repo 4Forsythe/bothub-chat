@@ -30,6 +30,7 @@ const StyledFieldInput = styled.input`
   }
 
   &:disabled {
+    opacity: 0.75;
     cursor: default;
     background-color: rgba(var(--sidebar-color), 0.75);
   }
