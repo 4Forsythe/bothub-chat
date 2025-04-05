@@ -71,14 +71,10 @@ export function ChatPage(): React.JSX.Element {
     error,
   } = useGetMessagesQuery(id);
 
-  console.log('CHAT', chat);
-
   useChatSSE(id, {
     deps: [isFetching],
     enable: Boolean(messages && !isLoading && !isFetching),
   });
-
-  console.log('GETTING DATA', messages);
 
   if (isError) {
     return <ErrorBlock error={error as ErrorResponseType} />;

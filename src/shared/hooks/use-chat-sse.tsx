@@ -52,8 +52,6 @@ export const useChatSSE = (chatId: string, options: UseChatSSEOptions) => {
       const response: StreamingMessageType = JSON.parse(event.data);
       const message = response.data.message;
 
-      console.log('SSE', response);
-
       if (response.name === 'MESSAGE_CREATE') {
         dispatch(
           messageApi.util.updateQueryData('getMessages', chatId, (draft) => {
