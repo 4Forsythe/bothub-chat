@@ -12,6 +12,7 @@ const StyledButton = styled.button<{ $contrast?: boolean }>`
   border-radius: 8px;
   border: 1px solid rgb(var(--border-color));
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   color: ${({ $contrast }) =>

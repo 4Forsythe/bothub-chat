@@ -1,11 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Globe, Loader, MessageSquarePlus, Search } from 'lucide-react';
+import { Globe, Loader, MessageSquarePlus } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { IconButton, Selector } from '@/shared/ui';
-import { LogoutButton, SidebarMenuItem } from '@/shared/components';
+import {
+  LogoutButton,
+  SidebarMenuItem,
+  SidebarSearch,
+} from '@/shared/components';
 import { useDeleteChatMutation, useGetChatsQuery } from '@/entities/chat';
 
 const SidebarWrapper = styled.aside`
@@ -40,6 +44,8 @@ const Logo = styled.img`
 
 const SidebarTop = styled.div`
   gap: 10px;
+  width: 100%;
+  max-width: 100%;
   margin-bottom: 16px;
   display: flex;
   align-items: center;
@@ -53,6 +59,13 @@ const SidebarContent = styled.div`
   flex-direction: column;
   border-top: 1px solid rgb(var(--border-color));
   overflow: hidden;
+`;
+
+const SidebarContentMessage = styled.span`
+  padding: 8px 0;
+  font-size: 14px;
+  font-style: italic;
+  color: rgba(var(--muted-color), 0.8);
 `;
 
 const SidebarContentLoader = styled.div`
@@ -89,16 +102,21 @@ export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [isPendingId, setIsPendingId] = React.useState<string | null>(null);
+  const [searchValue, setSearchValue] = React.useState('');
   const [languageIndex, setLanguageIndex] = React.useState(0);
+  const [isPendingId, setIsPendingId] = React.useState<string | null>(null);
 
   const { data: chats, isLoading, isError } = useGetChatsQuery();
   const [deleteChat] = useDeleteChatMutation();
 
+  const sortedChats = React.useMemo(() => {
+    return chats?.data.filter((chat) =>
+      chat.name.toLowerCase().includes(searchValue.trim().toLowerCase())
+    );
+  }, [chats, searchValue]);
+
   React.useEffect(() => {
-    if (isError) {
-      toast.error('Не удалось загрузить список чатов');
-    }
+    isError && toast.error('Ошибка при загрузке журнала');
   }, [isError]);
 
   const createChatTemplate = () => {
@@ -142,7 +160,10 @@ export const Sidebar: React.FC = () => {
             icon={MessageSquarePlus}
             onClick={createChatTemplate}
           />
-          <IconButton aria-label='Поиск среди чатов' icon={Search} contrast />
+          <SidebarSearch
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
         </SidebarTop>
         <SidebarContent>
           {isLoading ? (
@@ -151,9 +172,8 @@ export const Sidebar: React.FC = () => {
             </SidebarContentLoader>
           ) : (
             <SidebarContentList>
-              {chats &&
-                chats.data.length > 0 &&
-                chats.data.map((item, index) => (
+              {sortedChats && sortedChats.length > 0 ? (
+                sortedChats.map((item, index) => (
                   <SidebarMenuItem
                     key={index}
                     chat={item}
@@ -162,7 +182,14 @@ export const Sidebar: React.FC = () => {
                     isPending={isPendingId === item.id}
                     onDelete={() => handleDelete(item.id)}
                   />
-                ))}
+                ))
+              ) : isError ? (
+                <SidebarContentMessage>
+                  Ошибка при загрузке журнала
+                </SidebarContentMessage>
+              ) : (
+                <SidebarContentMessage>Ваш журнал пуст</SidebarContentMessage>
+              )}
             </SidebarContentList>
           )}
         </SidebarContent>
