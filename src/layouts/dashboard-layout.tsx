@@ -11,7 +11,15 @@ const DashboardWrapper = styled.div`
   padding: 16px;
   display: grid;
   grid-template-columns: 324px auto;
+  position: relative;
   overflow: hidden;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: auto;
+  }
+  @media (max-width: 480px) {
+    padding: 0;
+  }
 `;
 
 export function DashboardLayout(): React.JSX.Element {

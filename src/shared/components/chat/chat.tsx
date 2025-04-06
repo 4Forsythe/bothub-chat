@@ -46,6 +46,18 @@ const ChatContainer = styled.div`
     );
     position: absolute;
   }
+
+  @media (max-width: 768px) {
+    gap: 32px;
+    margin-bottom: 14px;
+    padding-right: 4px;
+    padding-bottom: 8px;
+  }
+  @media (max-width: 480px) {
+    &::after {
+      display: none;
+    }
+  }
 `;
 
 const ChatPlaceholder = styled.section`
@@ -89,7 +101,7 @@ export const Chat: React.FC<Props> = ({ chat, messages }) => {
           </ChatContainer>
         ) : (
           <ChatPlaceholder>
-            <Heading as='h2' size='md' text='😳 Кажется тут пусто 👉👈' />
+            <Heading as='h2' size='md' text='Кажется тут пусто 👀' />
             <Paragraph>
               Мы пока не начали вести переписку. Не стесняйся, спрашивай о чем
               угодно! В пределах разумного...

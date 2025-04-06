@@ -7,6 +7,7 @@ import { Heading } from '@/shared/ui';
 const WelcomeAnimationWrapper = styled.div`
   inset: 0;
   opacity: 0;
+  padding: 20px;
   z-index: 1000;
   display: flex;
   align-items: center;

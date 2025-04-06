@@ -7,8 +7,8 @@ import { RippleEffect } from '@/shared/ui';
 const StyledButton = styled.button`
   gap: 6px;
   width: fit-content;
-  padding: 14px 28px;
   height: 52px;
+  padding: 14px 28px;
   font-size: 16px;
   font-weight: 500;
   border-radius: 8px;
@@ -38,6 +38,11 @@ const StyledButton = styled.button`
   &:focus-visible {
     outline: none;
     box-shadow: 0 0 0 4px rgba(var(--primary-color), 0.5);
+  }
+
+  @media (max-width: 480px) {
+    height: 45px;
+    padding: 12px 20px;
   }
 `;
 

@@ -8,6 +8,10 @@ const StyledField = styled.div`
 
 const StyledFieldLabel = styled.label`
   margin-bottom: 8px;
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+  }
 `;
 
 const StyledFieldInput = styled.input`

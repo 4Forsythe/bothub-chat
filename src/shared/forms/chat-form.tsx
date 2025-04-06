@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 
 import { Selector } from '@/shared/ui';
 import { ChatInput, ModelItem } from '@/shared/components';
+
 import { useGetModelsQuery } from '@/entities/model';
 import { useCreateChatMutation } from '@/entities/chat';
 import { useCreateMessageMutation } from '@/entities/message';
@@ -24,6 +25,8 @@ export const ChatForm: React.FC<Props> = ({ chatId }) => {
 
   const [inputValue, setInputValue] = React.useState('');
   const [targetModel, setTargetModel] = React.useState(0);
+
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   const { data: models, isLoading, isError, isSuccess } = useGetModelsQuery();
 
@@ -53,12 +56,13 @@ export const ChatForm: React.FC<Props> = ({ chatId }) => {
     event.preventDefault();
 
     if (!inputValue.trim()) return;
+    if (isPendingChat || isPendingMessage) return;
 
     try {
       if (chatId) {
         return createMessage({
           chatId: chatId,
-          message: inputValue,
+          message: inputValue.trim(),
         });
       }
 
@@ -78,6 +82,7 @@ export const ChatForm: React.FC<Props> = ({ chatId }) => {
       toast.error('Произошла ошибка во время создания чата');
     } finally {
       setInputValue('');
+      inputRef.current?.focus();
     }
   };
 
@@ -99,6 +104,7 @@ export const ChatForm: React.FC<Props> = ({ chatId }) => {
         </Selector>
       )}
       <ChatInput
+        ref={inputRef}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         isLoading={isPendingChat || isPendingMessage}

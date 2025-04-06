@@ -6,6 +6,11 @@ import styled from 'styled-components';
 const StyledMarkdown = styled.div`
   max-width: inherit;
 
+  & > *:not(:last-child),
+  * > *:not(:last-child) {
+    margin-bottom: 10px;
+  }
+
   h1,
   h2,
   h3 {

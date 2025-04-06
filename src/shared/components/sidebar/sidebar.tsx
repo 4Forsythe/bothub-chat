@@ -1,25 +1,55 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Globe, Loader, MessageSquarePlus } from 'lucide-react';
+import {
+  ArrowRightToLine,
+  Globe,
+  Loader,
+  MessageSquarePlus,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
-import { IconButton, Selector } from '@/shared/ui';
 import {
   LogoutButton,
   SidebarMenuItem,
   SidebarSearch,
 } from '@/shared/components';
+import { IconButton, Selector } from '@/shared/ui';
+import { languages } from '@/shared/constants';
+
+import { useAppDispatch, useAppSelector } from '@/app/redux';
+import { selectSidebar, setSidebarOpen } from '@/entities/sidebar';
 import { useDeleteChatMutation, useGetChatsQuery } from '@/entities/chat';
 
-const SidebarWrapper = styled.aside`
-  width: 324px;
+const SidebarWrapper = styled.aside<{ $isOpen: boolean }>`
+  width: 100%;
   height: 100%;
+  max-width: 324px;
   max-height: inherit;
+  z-index: 1000;
   display: flex;
   border-radius: 18px;
   background-color: rgb(var(--sidebar-color));
   overflow: hidden;
+
+  @media (max-width: 1024px) {
+    top: 0;
+    left: ${({ $isOpen }) => ($isOpen ? '0' : '-100%')};
+    transition: left 150ms ease;
+    position: fixed;
+  }
+`;
+
+const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
+  display: none;
+
+  @media (max-width: 1024px) {
+    inset: 0;
+    z-index: 900;
+    display: ${({ $isOpen }) => ($isOpen ? 'block' : 'none')};
+    background-color: rgba(var(--background-color), 0.75);
+    position: fixed;
+  }
 `;
 
 const SidebarContainer = styled.div`
@@ -96,11 +126,14 @@ const SidebarContentList = styled.ul`
   overflow-y: auto;
 `;
 
-const languages: string[] = ['RU', 'EN'];
+/* Note: Тут тоже компонент довольно большой - декомпозировать и отрефакторить. */
 
 export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const dispatch = useAppDispatch();
+  const { isOpen } = useAppSelector(selectSidebar);
 
   const [searchValue, setSearchValue] = React.useState('');
   const [languageIndex, setLanguageIndex] = React.useState(0);
@@ -121,6 +154,7 @@ export const Sidebar: React.FC = () => {
 
   const createChatTemplate = () => {
     navigate('/');
+    dispatch(setSidebarOpen(false));
   };
 
   const handleDelete = async (id: string) => {
@@ -136,65 +170,81 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <SidebarWrapper>
-      <SidebarContainer>
-        <SidebarHeader>
-          <Link to='/'>
-            <Logo src='/logo.svg' alt='Logo' />
-          </Link>
-          <Selector
-            values={languages}
-            targetIndex={languageIndex}
-            onChange={(index) => setLanguageIndex(index)}
-            style={{ gap: '6px', padding: '0', width: '68px' }}
-            popupWidth={68}
-            border={false}
-          >
-            <Globe style={{ flexShrink: 0 }} size={18} />
-            <span style={{ flex: 1 }}>{languages[languageIndex]}</span>
-          </Selector>
-        </SidebarHeader>
-        <SidebarTop>
-          <IconButton
-            aria-label='Создать новый чат'
-            icon={MessageSquarePlus}
-            onClick={createChatTemplate}
-          />
-          <SidebarSearch
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-        </SidebarTop>
-        <SidebarContent>
-          {isLoading ? (
-            <SidebarContentLoader>
-              <StyledLoader size={20} />
-            </SidebarContentLoader>
-          ) : (
-            <SidebarContentList>
-              {sortedChats && sortedChats.length > 0 ? (
-                sortedChats.map((item, index) => (
-                  <SidebarMenuItem
-                    key={index}
-                    chat={item}
-                    path={`/chat/${item.id}`}
-                    isActive={location.pathname.includes(item.id)}
-                    isPending={isPendingId === item.id}
-                    onDelete={() => handleDelete(item.id)}
-                  />
-                ))
-              ) : isError ? (
-                <SidebarContentMessage>
-                  Ошибка при загрузке журнала
-                </SidebarContentMessage>
-              ) : (
-                <SidebarContentMessage>Ваш журнал пуст</SidebarContentMessage>
-              )}
-            </SidebarContentList>
-          )}
-        </SidebarContent>
-        <LogoutButton />
-      </SidebarContainer>
-    </SidebarWrapper>
+    <React.Fragment>
+      <SidebarWrapper $isOpen={isOpen}>
+        <SidebarContainer>
+          <SidebarHeader>
+            <Link to='/' style={{ marginRight: 'auto' }}>
+              <Logo src='/logo.svg' alt='Logo' />
+            </Link>
+            <Selector
+              values={languages}
+              targetIndex={languageIndex}
+              onChange={(index) => setLanguageIndex(index)}
+              style={{ gap: '6px', padding: '0', width: '68px' }}
+              popupWidth={68}
+              border={false}
+            >
+              <Globe style={{ flexShrink: 0 }} size={18} />
+              <span style={{ flex: 1 }}>{languages[languageIndex]}</span>
+            </Selector>
+            {isOpen && (
+              <IconButton
+                aria-label='Скрыть боковую панель'
+                icon={ArrowRightToLine}
+                contrast
+                style={{ marginLeft: '10px', border: 'none' }}
+                onClick={() => dispatch(setSidebarOpen(false))}
+              />
+            )}
+          </SidebarHeader>
+          <SidebarTop>
+            <IconButton
+              aria-label='Создать новый чат'
+              icon={MessageSquarePlus}
+              onClick={createChatTemplate}
+            />
+            <SidebarSearch
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </SidebarTop>
+          <SidebarContent>
+            {isLoading ? (
+              <SidebarContentLoader>
+                <StyledLoader size={20} />
+              </SidebarContentLoader>
+            ) : (
+              <SidebarContentList>
+                {sortedChats && sortedChats.length > 0 ? (
+                  sortedChats.map((item, index) => (
+                    <SidebarMenuItem
+                      key={index}
+                      chat={item}
+                      path={`/chat/${item.id}`}
+                      isActive={location.pathname.includes(item.id)}
+                      isPending={isPendingId === item.id}
+                      onDelete={() => handleDelete(item.id)}
+                      onClick={() => dispatch(setSidebarOpen(false))}
+                    />
+                  ))
+                ) : isError ? (
+                  <SidebarContentMessage>
+                    Ошибка при загрузке журнала
+                  </SidebarContentMessage>
+                ) : (
+                  <SidebarContentMessage>Ваш журнал пуст</SidebarContentMessage>
+                )}
+              </SidebarContentList>
+            )}
+          </SidebarContent>
+          <LogoutButton />
+        </SidebarContainer>
+      </SidebarWrapper>
+      <SidebarOverlay
+        $isOpen={isOpen}
+        onClick={() => dispatch(setSidebarOpen(false))}
+      />
+    </React.Fragment>
   );
 };

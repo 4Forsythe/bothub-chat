@@ -1,14 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Loader2, Send } from 'lucide-react';
+import { Loader2, Menu, Send } from 'lucide-react';
 
 import { IconButton } from '@/shared/ui';
+import { useAppDispatch } from '@/app/redux';
+import { setSidebarOpen } from '@/entities/sidebar';
 
 const ChatInputWrapper = styled.div<{
   $isFocus?: boolean;
   $isLoading?: boolean;
 }>`
-  gap: 14px;
   width: 100%;
   height: 66px;
   padding-right: 20px;
@@ -36,19 +37,36 @@ const ChatInputWrapper = styled.div<{
     $isLoading &&
     `
     opacity: 0.75;
-    pointer-events: none;
     background-color: rgba(var(--secondary-color), 0.5);
   `}
+
+  @media (max-width: 480px) {
+    padding-right: 12px;
+  }
+`;
+
+const HamburgerButton = styled(IconButton)`
+  display: none;
+  margin-left: 20px;
+
+  @media (max-width: 1024px) {
+    display: block;
+  }
+  @media (max-width: 480px) {
+    margin-left: 12px;
+  }
 `;
 
 const ChatInputField = styled.input`
-  flex: 1;
-  border: none;
+  width: 100%;
+  flex-grow: 1;
+  margin-right: 14px;
   padding: 24px 0 24px 20px;
   font-size: 15px;
   font-weight: 500;
   font-family: var(--font-sans);
   background-color: transparent;
+  border: none;
 
   &::placeholder {
     color: rgb(var(--muted-foreground-color));
@@ -61,6 +79,10 @@ const ChatInputField = styled.input`
   &:focus,
   &:focus-visible {
     outline: none;
+  }
+
+  @media (max-width: 480px) {
+    padding: 24px 0 24px 12px;
   }
 `;
 
@@ -78,19 +100,32 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   isLoading?: boolean;
 }
 
-export const ChatInput: React.FC<Props> = ({ isLoading, ...rest }) => {
-  const [isFocus, setIsFocus] = React.useState(false);
+export const ChatInput = React.forwardRef<HTMLInputElement, Props>(
+  ({ isLoading, ...rest }, ref) => {
+    const [isFocus, setIsFocus] = React.useState(false);
 
-  return (
-    <ChatInputWrapper $isFocus={isFocus} $isLoading={isLoading}>
-      <ChatInputField
-        placeholder='Спроси о чем-нибудь...'
-        onFocus={() => setIsFocus(true)}
-        onBlur={() => setIsFocus(false)}
-        disabled={isLoading || rest.disabled}
-        {...rest}
-      />
-      {isLoading ? <LoaderIcon /> : <IconButton icon={Send} type='submit' />}
-    </ChatInputWrapper>
-  );
-};
+    const dispatch = useAppDispatch();
+
+    return (
+      <ChatInputWrapper $isFocus={isFocus} $isLoading={isLoading}>
+        <HamburgerButton
+          aria-label='Открыть боковую панель'
+          icon={Menu}
+          type='button'
+          contrast
+          onClick={() => dispatch(setSidebarOpen(true))}
+        />
+        <ChatInputField
+          ref={ref}
+          placeholder='Спроси о чем-нибудь...'
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          {...rest}
+        />
+        {isLoading ? <LoaderIcon /> : <IconButton icon={Send} type='submit' />}
+      </ChatInputWrapper>
+    );
+  }
+);
+
+ChatInput.displayName = 'ChatInput';

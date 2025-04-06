@@ -10,6 +10,7 @@ import { selectAuth, login, setAuthLoading } from '@/entities/auth';
 
 const FormWrapper = styled.div`
   width: 459px;
+  max-width: 100%;
   padding: 20px;
   display: flex;
   flex-direction: column;

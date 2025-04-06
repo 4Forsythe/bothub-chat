@@ -15,6 +15,13 @@ const UserChatMessageWrapper = styled.div`
   margin-left: auto;
   display: flex;
   align-items: flex-end;
+
+  @media (max-width: 768px) {
+    max-width: 75%;
+  }
+  @media (max-width: 480px) {
+    max-width: 90%;
+  }
 `;
 
 const UserChatMessageContent = styled.div`
@@ -28,6 +35,8 @@ const UserChatMessageContent = styled.div`
 const UserChatMessageText = styled.div`
   padding: 7px 8px;
   font-size: 16px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 `;
 
 const UserChatMessageTimestamp = styled.span`
@@ -43,6 +52,13 @@ const ModelChatMessageWrapper = styled.div`
   max-width: 70%;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 768px) {
+    max-width: 85%;
+  }
+  @media (max-width: 480px) {
+    max-width: 100%;
+  }
 `;
 
 const ModelChatMessageHeader = styled.div`
@@ -58,6 +74,7 @@ const ModelChatMessageContainer = styled.div`
   max-width: 100%;
   display: flex;
   align-items: flex-start;
+  position: relative;
 `;
 
 const ModelChatMessageContent = styled.div`
@@ -74,6 +91,8 @@ const ModelChatMessageContent = styled.div`
 const ModelChatMessageText = styled.div`
   max-width: 100%;
   min-height: 51px;
+  word-break: break-word;
+  overflow-wrap: break-word;
   padding: 8.5px 4px;
   display: flex;
   align-items: flex-start;
@@ -101,6 +120,11 @@ const ModelChatMessageScore = styled.span`
 
 const ModelChatMessageTimestamp = styled.span`
   font-size: 11px;
+`;
+
+const StyledAvatarContainer = styled.div`
+  top: 20px;
+  position: sticky;
 `;
 
 interface Props {
@@ -142,14 +166,18 @@ export const ChatMessage: React.FC<Props> = ({ data, model }) => {
         {model_id && <Badge text={model_id} />}
       </ModelChatMessageHeader>
       <ModelChatMessageContainer>
-        <Avatar
-          url={iconFile}
-          backgroundColor={model.message_color ?? undefined}
-        />
+        <StyledAvatarContainer>
+          <Avatar
+            url={iconFile}
+            backgroundColor={model.message_color ?? undefined}
+          />
+        </StyledAvatarContainer>
         <ModelChatMessageContent>
           <ModelChatMessageText>
             <MessageMarkdown>
-              {status === 'PENDING' && !content ? '...' : content}
+              {status === 'PENDING' && !content
+                ? '...'
+                : content ?? '*молчание*'}
             </MessageMarkdown>
           </ModelChatMessageText>
           {status === 'DONE' && (

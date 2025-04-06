@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { Loader2, MessageSquare, Trash } from 'lucide-react';
 
 import type { ChatType } from '@/entities/chat';
-import { isPending } from '@reduxjs/toolkit';
 
 const MenuItemWrapper = styled.li<{
   $isActive?: boolean;
@@ -64,6 +63,7 @@ interface Props extends ISidebarMenuItem {
   isActive?: boolean;
   isPending?: boolean;
   onDelete: () => void;
+  onClick?: () => void;
 }
 
 export const SidebarMenuItem: React.FC<Props> = ({
@@ -72,9 +72,14 @@ export const SidebarMenuItem: React.FC<Props> = ({
   isActive,
   isPending,
   onDelete,
+  onClick,
 }) => {
   return (
-    <MenuItemWrapper $isActive={isActive} $isPending={isPending}>
+    <MenuItemWrapper
+      $isActive={isActive}
+      $isPending={isPending}
+      onClick={onClick}
+    >
       <StyledLink to={path}>
         <MessageSquare size={15} />
         <span
