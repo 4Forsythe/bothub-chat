@@ -45,6 +45,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+code,
+pre {
+  font-family: var(--font-mono);
+}
+
 a {
   text-decoration: inherit;
 }

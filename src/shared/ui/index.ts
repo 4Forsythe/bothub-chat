@@ -8,4 +8,5 @@ export { Heading } from './heading';
 export { Paragraph } from './paragraph';
 export { Selector } from './selector';
 export { SelectorDropdown } from './selector-dropdown';
+export { MessageMarkdown } from './message-markdown';
 export { RippleEffect } from './ripple-effect';

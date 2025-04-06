@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Avatar, Badge } from '@/shared/ui';
 import { ChatCopyButton } from '@/shared/components';
+import { Avatar, Badge, MessageMarkdown } from '@/shared/ui';
 import { modelIcons } from '@/shared/constants';
 
 import type { ModelType } from '@/entities/model';
@@ -25,7 +25,7 @@ const UserChatMessageContent = styled.div`
   position: relative;
 `;
 
-const UserChatMessageText = styled.p`
+const UserChatMessageText = styled.div`
   padding: 7px 8px;
   font-size: 16px;
 `;
@@ -40,13 +40,14 @@ const UserChatMessageTimestamp = styled.span`
 const ModelChatMessageWrapper = styled.div`
   gap: 10px;
   width: fit-content;
-  max-width: 60%;
+  max-width: 70%;
   display: flex;
   flex-direction: column;
 `;
 
 const ModelChatMessageHeader = styled.div`
   gap: 10px;
+  max-width: 100%;
   padding-left: 52px;
   display: flex;
   align-items: center;
@@ -54,22 +55,30 @@ const ModelChatMessageHeader = styled.div`
 
 const ModelChatMessageContainer = styled.div`
   gap: 12px;
+  max-width: 100%;
   display: flex;
   align-items: flex-start;
 `;
 
 const ModelChatMessageContent = styled.div`
   gap: 8px;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  overflow: hidden;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
 `;
 
-const ModelChatMessageText = styled.p`
+const ModelChatMessageText = styled.div`
+  max-width: 100%;
   min-height: 51px;
   padding: 8.5px 4px;
   display: flex;
   align-items: flex-start;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
 `;
 
 const ModelChatMessageFooter = styled.div`
@@ -116,7 +125,9 @@ export const ChatMessage: React.FC<Props> = ({ data, model }) => {
       <UserChatMessageWrapper>
         <ChatCopyButton value={content} />
         <UserChatMessageContent>
-          <UserChatMessageText>{content}</UserChatMessageText>
+          <UserChatMessageText>
+            <MessageMarkdown>{content}</MessageMarkdown>
+          </UserChatMessageText>
           <UserChatMessageTimestamp>{timestamp}</UserChatMessageTimestamp>
         </UserChatMessageContent>
         <Avatar />
@@ -137,7 +148,9 @@ export const ChatMessage: React.FC<Props> = ({ data, model }) => {
         />
         <ModelChatMessageContent>
           <ModelChatMessageText>
-            {status === 'PENDING' && !content ? '...' : content}
+            <MessageMarkdown>
+              {status === 'PENDING' && !content ? '...' : content}
+            </MessageMarkdown>
           </ModelChatMessageText>
           {status === 'DONE' && (
             <ModelChatMessageFooter>

@@ -67,28 +67,38 @@ interface Props {
 }
 
 export const Chat: React.FC<Props> = ({ chat, messages }) => {
-  const { chatId } = useParams();
+  const { id: chatId } = useParams();
 
   const scrollRef = useScrollDown([messages, chatId]);
 
   return (
     <ChatWrapper>
-      {chat && messages ? (
-        <ChatContainer ref={scrollRef}>
-          {messages
-            .slice()
-            .reverse()
-            .map((message) => (
-              <ChatMessage
-                key={`${message.id}-${message.content?.length}`}
-                data={message}
-                model={chat.model}
-              />
-            ))}
-        </ChatContainer>
+      {chatId && chat ? (
+        messages && messages.length > 0 ? (
+          <ChatContainer ref={scrollRef}>
+            {messages
+              .slice()
+              .reverse()
+              .map((message) => (
+                <ChatMessage
+                  key={`${message.id}-${message.content?.length}`}
+                  data={message}
+                  model={chat.model}
+                />
+              ))}
+          </ChatContainer>
+        ) : (
+          <ChatPlaceholder>
+            <Heading as='h2' size='md' text='😳 Кажется тут пусто 👉👈' />
+            <Paragraph>
+              Мы пока не начали вести переписку. Не стесняйся, спрашивай о чем
+              угодно! В пределах разумного...
+            </Paragraph>
+          </ChatPlaceholder>
+        )
       ) : (
         <ChatPlaceholder>
-          <Heading as='h1' size='md' text='👋 Привет, чем могу быть полезен?' />
+          <Heading as='h2' size='md' text='👋 Привет, чем могу быть полезен?' />
           <Paragraph>
             Можешь спросить меня о чем угодно! Для выбора модели используй
             раскрывающийся список ниже (По умолчанию ответит ChatGPT)
