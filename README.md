@@ -12,6 +12,13 @@
 
 или просто `npm run dev` для dev-режима
 
+#### Important
+
+Перед запуском сервера убедитесь, что у вас присутствует файл `.env` со следующими ключами:
+
+- `VITE_API_BASE_URL=тело_апи`
+- `VITE_API_AUTH_TOKEN=bearer_токен`
+
 ### Tech-Stack
 
 За основу проекта был взят сборщик **[Vite](https://vite.dev)** с темплейтом **React TypeScript**
