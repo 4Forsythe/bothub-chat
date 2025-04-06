@@ -21,6 +21,10 @@ const ChatWrapper = styled.main`
   background-color: rgb(var(--sidebar-color));
   position: relative;
   overflow: hidden;
+
+  @media (max-width: 480px) {
+    border-radius: 0;
+  }
 `;
 
 const ChatContainer = styled.div`
@@ -61,19 +65,24 @@ export function ChatPage(): React.JSX.Element {
 
   if (!id) return <Navigate to='/404' replace />;
 
-  const { data: chat } = useGetChatByIdQuery(id);
-
+  const {
+    data: chat,
+    isLoading: isLoadingChat,
+    isFetching: isFetchingChat,
+  } = useGetChatByIdQuery(id);
   const {
     data: messages,
-    isLoading,
-    isFetching,
+    isLoading: isLoadingMessages,
+    isFetching: isFetchingMessages,
     isError,
     error,
   } = useGetMessagesQuery(id);
 
+  const isInitialLoading = isLoadingChat || isFetchingChat || isLoadingMessages;
+
   useChatSSE(id, {
-    deps: [isFetching],
-    enable: Boolean(messages && !isLoading && !isFetching),
+    deps: [isFetchingMessages],
+    enable: Boolean(messages && !isLoadingMessages && !isFetchingMessages),
   });
 
   if (isError) {
@@ -85,12 +94,13 @@ export function ChatPage(): React.JSX.Element {
       <Container style={{ flex: 1, maxHeight: '100%' }}>
         <ChatContainer>
           <ChatContentSection>
-            {isLoading ? (
+            {isInitialLoading ? (
               <LoaderWrapper>
                 <StyledLoader size={24} />
               </LoaderWrapper>
             ) : (
-              !isLoading && messages && <Chat chat={chat} messages={messages} />
+              !isLoadingMessages &&
+              messages && <Chat chat={chat} messages={messages} />
             )}
           </ChatContentSection>
           <ChatForm chatId={id} />
