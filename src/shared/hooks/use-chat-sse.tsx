@@ -2,6 +2,7 @@ import React from 'react';
 import { EventSource } from 'eventsource';
 
 import { useAppDispatch } from '@/app/redux';
+import { subtractTokens } from '@/entities/auth';
 import { messageApi, type StreamingMessageType } from '@/entities/message';
 
 const baseUrl: string = import.meta.env.VITE_API_BASE_URL;
@@ -52,6 +53,8 @@ export const useChatSSE = (chatId: string, options: UseChatSSEOptions) => {
       const response: StreamingMessageType = JSON.parse(event.data);
       const message = response.data.message;
 
+      console.log('SSE', response);
+
       if (response.name === 'MESSAGE_CREATE') {
         dispatch(
           messageApi.util.updateQueryData('getMessages', chatId, (draft) => {
@@ -77,6 +80,10 @@ export const useChatSSE = (chatId: string, options: UseChatSSEOptions) => {
             }
           })
         );
+
+        if (response.data.message.tokens) {
+          dispatch(subtractTokens(response.data.message.tokens));
+        }
       }
 
       if (response.name === 'SUBSCRIPTION_UPDATE') {

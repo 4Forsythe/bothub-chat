@@ -3,14 +3,22 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { getLocalStorage } from '@/features/helpers';
 import type { AuthUserType } from './types';
 
+type UserType = {
+  login: string | null;
+  tokens: number;
+};
+
 interface AuthState {
-  user: string | null;
+  user: UserType;
   isSigned: boolean;
   isLoading: boolean;
 }
 
 const initialState: AuthState = {
-  user: getLocalStorage<AuthUserType>('auth')?.login || null,
+  user: {
+    login: getLocalStorage<AuthUserType>('auth')?.login || null,
+    tokens: Number(getLocalStorage<string>('tokens')) || 9012,
+  },
   isSigned: !!getLocalStorage<AuthUserType>('auth'),
   isLoading: false,
 };
@@ -20,14 +28,18 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     login: (state, action: PayloadAction<AuthUserType>) => {
-      state.user = action.payload.login;
+      state.user.login = action.payload.login;
       state.isSigned = true;
       localStorage.setItem('auth', JSON.stringify(action.payload));
     },
     logout: (state) => {
-      state.user = null;
+      state.user.login = null;
       state.isSigned = false;
       localStorage.removeItem('auth');
+    },
+    subtractTokens: (state, action: PayloadAction<number>) => {
+      state.user.tokens = state.user.tokens - action.payload;
+      localStorage.setItem('tokens', JSON.stringify(state.user.tokens));
     },
     setAuthLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
@@ -35,6 +47,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { login, logout, setAuthLoading } = authSlice.actions;
+export const { login, logout, subtractTokens, setAuthLoading } =
+  authSlice.actions;
 
 export default authSlice.reducer;

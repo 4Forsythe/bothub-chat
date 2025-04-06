@@ -10,15 +10,15 @@ interface Props {
 
 export function Middleware({ children }: Props): React.JSX.Element | null {
   const navigate = useNavigate();
-  const { user } = useAppSelector(selectAuth);
+  const { user, isSigned } = useAppSelector(selectAuth);
 
   React.useEffect(() => {
-    if (!user) {
+    if (!isSigned) {
       navigate('/auth', { replace: true });
     }
   }, [user, navigate]);
 
-  if (!user) return null;
+  if (!isSigned) return null;
 
   return <React.Fragment>{children}</React.Fragment>;
 }
