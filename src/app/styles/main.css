@@ -34,7 +34,6 @@ body {
   line-height: 1.5;
   font-weight: 400;
   font-family: var(--font-sans);
-  max-height: 100vh;
   overflow: hidden;
 
   color-scheme: light dark;
